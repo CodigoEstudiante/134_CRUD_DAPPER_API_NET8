@@ -1,0 +1,111 @@
+﻿
+create database DBEmpleado
+go
+
+use DBEmpleado
+go
+
+create table Empleado(
+IdEmpleado int primary key identity(1,1),
+NumeroDocumento varchar(8),
+NombreCompleto varchar(50),
+Sueldo int
+)
+
+go
+------- CREAR PROCEDIMIENTOS -------
+
+create procedure sp_listaEmpleados
+as
+begin
+
+	select
+	IdEmpleado,
+	NumeroDocumento,
+	NombreCompleto,
+	Sueldo
+	from Empleado
+end
+
+go
+
+create procedure sp_obtenerEmpleado
+(
+@idEmpleado int
+)
+as
+begin
+
+	select
+	IdEmpleado,
+	NumeroDocumento,
+	NombreCompleto,
+	Sueldo
+	from Empleado
+	where IdEmpleado = @idEmpleado
+
+end
+
+go
+
+create procedure sp_crearEmpleado(
+@numeroDocumento varchar(8),
+@nombreCompleto varchar(50),
+@sueldo int,
+@msgError varchar(100) output
+)
+as
+begin
+	
+	if(exists(select * from Empleado where NumeroDocumento = @numeroDocumento))
+	begin
+		set @msgError = 'El nro documento ya se encuentra registrado'
+		return
+	end
+
+	insert into Empleado(NumeroDocumento,NombreCompleto,Sueldo) values
+	(@numeroDocumento,@nombreCompleto,@sueldo)
+
+	set @msgError = ''
+end
+
+go
+
+
+create procedure sp_editarEmpleado(
+@idEmpleado int,
+@numeroDocumento varchar(8),
+@nombreCompleto varchar(50),
+@sueldo int,
+@msgError varchar(100) output
+)
+as
+begin
+	
+	if(exists(select * from Empleado where NumeroDocumento = @numeroDocumento
+		and IdEmpleado != @idEmpleado
+	))
+	begin
+		set @msgError = 'El nro documento ya se encuentra registrado'
+		return
+	end
+
+	update Empleado set
+	NumeroDocumento = @numeroDocumento,
+	NombreCompleto = @nombreCompleto,
+	Sueldo = @sueldo
+	where IdEmpleado = @idEmpleado
+
+	set @msgError = ''
+end
+
+go
+
+create procedure sp_eliminarEmpleado
+(
+@idEmpleado int
+)
+as
+begin
+	delete from Empleado where IdEmpleado = @idEmpleado
+end
